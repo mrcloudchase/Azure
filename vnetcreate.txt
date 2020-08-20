@@ -1,0 +1,6 @@
+az network vnet create `
+--address-prefixes 172.16.0.0/16 `
+--name yangVnet `
+--resource-group $rg.ResourceGroupName `
+--subnet-name yangSubnet `
+--subnet-prefixes 172.16.0.0/24
