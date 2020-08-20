@@ -1,0 +1,4 @@
+az vm open-port `
+-g $rg.ResourceGroupName `
+-n $vmname `
+--port 80
