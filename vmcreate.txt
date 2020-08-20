@@ -1,0 +1,11 @@
+az vm create `
+--resource-group $rg.ResourceGroupName `
+--name yinVM1 `
+--image "UbuntuLTS" `
+--size Standard_B1s `
+--vnet-name yinVnet `
+--subnet yinSubnet `
+--admin-username azureuser `
+--nsg-rule SSH `
+--admin-password Londyn0101!1 `
+--custom-data ./clouddrive/cloud-init.txt
