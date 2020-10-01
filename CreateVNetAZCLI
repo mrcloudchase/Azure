@@ -1,0 +1,6 @@
+az network vnet create `
+--address-prefixes 10.0.0.0/16 `
+--name $vnet `
+--resource-group $rg.ResourceGroupName `
+--subnet-name Default `
+--subnet-prefixes 10.0.0.0/24
