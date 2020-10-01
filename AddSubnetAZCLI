@@ -1,0 +1,43 @@
+#Add subnet to existing VNet
+az network vnet subnet create `
+--resource-group $rg.ResourceGroupName `
+--name AzureBastionSubnet `
+--address-prefixes 10.0.1.0/26 `
+--vnet-name $vnet
+
+#Create a Network Security Group
+az network nsg create `
+--name CloudChaseNSG `
+--resource-group $rg.ResourceGroupName
+
+
+#Create nsg rule to allow inbound traffic from any where to anywhere for port 80 destination port
+az network nsg rule create `
+--access Allow `
+--destination-address-prefixes '*' `
+--destination-port-ranges 80 `
+--direction Inbound `
+--name allow_http_inbound `
+--nsg-name CloudChaseNSG `
+--priority 100 `
+--protocol Tcp `
+--resource-group $rg.ResourceGroupName `
+--source-address-prefixes '*' `
+--source-port-ranges '*' `
+--description "Allow inbound http from any to any"
+
+#Create Azure Linux VM inside of VNet and Default Subnet
+az vm create `
+--name CloudChaseVM `
+--resource-group $rg.ResourceGroupName `
+--image "UbuntuLTS" `
+--admin-username "cloud_chase" `
+--generate-ssh-keys `
+--vnet-name $vnet `
+--subnet "Default"
+
+
+
+
+#In this demonstration we will create networkig resources using Azure CLI
+#1.) Create Virtual Network
