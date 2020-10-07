@@ -1,0 +1,42 @@
+$rg = (Get-AzResourceGroup).ResourceGroupName
+
+az network vnet create `
+  -g $rg `
+  -n CloudChaseVNet `
+  --adress-prefixes 10.15.0.0/16
+  --subnet-name Default `
+  --subnet-prefixes 10.16.0.0/24
+
+curl https://raw.githubusercontent.com/mrcloudchase/azurecli/master/cloud-init.txt?token=AQBY3EZQ5LQC52AZLM5S3K27PYDEK-o cloud-init.txt
+
+az vm create `
+  -g $rg `
+  -n CloudChaseVM1 `
+  --image UbuntuLTS `
+  --vnet-name CloudChaseVNet `
+  --subnet-name Default `
+  --custom-data ./cloud-init.txt `
+  --admin-username cloudchase `
+  --generate-ssh-keys
+
+az vm create `
+  -g $rg `
+  -n CloudChaseVM2 `
+  --image UbuntuLTS `
+  --vnet-name CloudChaseVNet `
+  --subnet-name Default `
+  --custom-data ./cloud-init.txt `
+  --admin-username cloudchase `
+  --generate-ssh-keys
+
+az vm open-port `
+  -g $rg `
+  -n CloudChaseVM1 `
+  --port 80 `
+az vm open-port `
+  -g $rg `
+  -n CloudChaseVM2 `
+  --port 80
+  
+
+## Then deploy load balancer, if choosing standard sku make sure to delete the public-ip for the vms because they are going to be a basic sku by default.
