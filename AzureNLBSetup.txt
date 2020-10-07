@@ -3,7 +3,7 @@ $rg = (Get-AzResourceGroup).ResourceGroupName
 az network vnet create `
   -g $rg `
   -n CloudChaseVNet `
-  --adress-prefixes 10.15.0.0/16
+  --address-prefixes 10.15.0.0/16
   --subnet-name Default `
   --subnet-prefixes 10.16.0.0/24
 
@@ -14,7 +14,7 @@ az vm create `
   -n CloudChaseVM1 `
   --image UbuntuLTS `
   --vnet-name CloudChaseVNet `
-  --subnet-name Default `
+  --subnet Default `
   --custom-data ./cloud-init.txt `
   --admin-username cloudchase `
   --generate-ssh-keys
@@ -24,7 +24,7 @@ az vm create `
   -n CloudChaseVM2 `
   --image UbuntuLTS `
   --vnet-name CloudChaseVNet `
-  --subnet-name Default `
+  --subnet Default `
   --custom-data ./cloud-init.txt `
   --admin-username cloudchase `
   --generate-ssh-keys
