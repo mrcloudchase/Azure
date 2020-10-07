@@ -7,7 +7,7 @@ az network vnet create `
   --subnet-name WebSubnet `
   --subnet-prefixes 10.15.0.0/24
 
-curl https://raw.githubusercontent.com/mrcloudchase/azurecli/master/cloud-init.txt?token=AQBY3EZQ5LQC52AZLM5S3K27PYDEK-o cloud-init.txt
+curl https://raw.githubusercontent.com/mrcloudchase/azurecli/master/cloud-init.txt?token=AQBY3EZQ5LQC52AZLM5S3K27PYDEK -o cloud-init.txt
 
 az vm create `
   -g $rg `
