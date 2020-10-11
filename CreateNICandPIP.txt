@@ -1,0 +1,15 @@
+#Create a NIC
+az network nic create `
+--resource-group $rg `
+--vnet-name CloudChaseVNet `
+--subnet WebSubnet `
+--name CloudChaseNIC-1
+
+#Create a Public-IP
+az network public-ip create `
+--name CloudChase-PIP-1 `
+--resource-group $rg `
+--sku Basic `
+--allocation-method Static
+
+# Next Step is to assign PIP to NIC ip configurations.
