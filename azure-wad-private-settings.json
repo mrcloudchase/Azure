@@ -1,0 +1,30 @@
+"PrivateConfig" {
+    "storageAccountName": "diagstorageaccount",
+    "storageAccountKey": "{base64 encoded key}",
+    "storageAccountEndPoint": "https://core.windows.net",
+    "storageAccountSasToken": "{sas token}",
+    "EventHub": {
+        "Url": "https://myeventhub-ns.servicebus.windows.net/diageventhub",
+        "SharedAccessKeyName": "SendRule",
+        "SharedAccessKey": "{base64 encoded key}"
+    },
+    "SecondaryStorageAccounts": {
+        "StorageAccount": [
+            {
+                "name": "secondarydiagstorageaccount",
+                "key": "{base64 encoded key}",
+                "endpoint": "https://core.windows.net",
+                "sasToken": "{sas token}"
+            }
+        ]
+    },
+    "SecondaryEventHubs": {
+        "EventHub": [
+            {
+                "Url": "https://myeventhub-ns.servicebus.windows.net/secondarydiageventhub",
+                "SharedAccessKeyName": "SendRule",
+                "SharedAccessKey": "{base64 encoded key}"
+            }
+        ]
+    }
+}
