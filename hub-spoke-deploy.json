@@ -1,0 +1,115 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {},
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "hubVNetName": "hub-vnet",
+    "hubServicesSubnetName": "SharedServicesSubnet",
+    "hubBastionSubnetName": "AzureBastionSubnet",
+    "hubFwSubnetName": "AzureFirewallSubnet",
+    "hubVNetPrefix": "10.0.0.0/16",
+    "hubServicesSubnetPrefix": "10.0.1.0/24",
+    "hubBastionSubnetPrefix": "10.0.2.0/26",
+    "hubFwSubnetPrefix": "10.0.3.0/26",
+    "spokeVNetName": "spoke-vnet",
+    "spokeServicesSubnetName": "SharedServicesSubnet",
+    "spokeVNetPrefix": "172.16.0.0/16",
+    "spokeServicesSubnetPrefix": "172.16.0.0/24"
+  },
+  "resources": [
+    {
+      "name": "[variables('hubVNetName')]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2018-08-01",
+      "location": "[variables('location')]",
+      "tags": {},
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('hubVNetPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('hubServicesSubnetName')]",
+            "properties": {
+              "addressPrefix": "[variables('hubServicesSubnetPrefix')]"
+            }
+          },
+          {
+            "name": "[variables('hubBastionSubnetName')]",
+            "properties": {
+              "addressPrefix": "[variables('hubBastionSubnetPrefix')]"
+            }
+          },
+          {
+            "name": "[variables('hubFwSubnetName')]",
+            "properties": {
+              "addressPrefix": "[variables('hubFwSubnetPrefix')]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "[variables('spokeVNetName')]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2018-08-01",
+      "location": "[variables('location')]",
+      "tags": {},
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('spokeVNetPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('spokeServicesSubnetName')]",
+            "properties": {
+              "addressPrefix": "[variables('spokeServicesSubnetPrefix')]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "[concat(variables('hubVNetName'), '/peer-to', variables('spokeVNetName'))]",
+      "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+      "apiVersion": "2019-04-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', variables('hubVNetName'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks', variables('spokeVNetName'))]"
+      ],
+      "properties": {
+        "remoteVirtualNetwork": {
+          "id": "[resourceId('Microsoft.Network/virtualNetworks', variables('spokeVNetName'))]"
+        },
+        "allowVirtualNetworkAccess": true,
+        "allowForwardedTraffic": true,
+        "allowGatewayTransit": false,
+        "useRemoteGateways": false
+      }
+    },
+    {
+      "name": "[concat(variables('spokeVNetName'), '/peer-to-', variables('hubVNetName'))]",
+      "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+      "apiVersion": "2019-04-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', variables('hubVNetName'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks', variables('spokeVNetName'))]"
+      ],
+      "properties": {
+        "remoteVirtualNetwork": {
+          "id": "[resourceId('Microsoft.Network/virtualNetworks', variables('hubVNetName'))]"
+        },
+        "allowVirtualNetworkAccess": false,
+        "allowForwardedTraffic": true,
+        "allowGatewayTransit": false,
+        "useRemoteGateways": false
+      }
+    }
+  ],
+  "outputs": {}
+}

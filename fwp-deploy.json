@@ -1,0 +1,69 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {},
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "existingVNetName": "hub-vnet",
+    "hubFwSubnetName": "AzureFirewallSubnet",
+    "hubFwName": "hub-fw",
+    "hubFwPolicyName": "[concat(variables('hubFwName'), '-policy')]",
+    "hubFwPublicIpName": "[concat(variables('hubFwName'), '-pip')]",
+    "azureFirewallSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets',variables('existingVNetName'), variables('hubFwSubnetName'))]",
+    "azureFirewallPublicIpId": "[resourceId('Microsoft.Network/publicIPAddresses',variables('hubFwPublicIpName'))]",
+    "azureFirewallPolicyId": "[resourceId('Microsoft.Network/firewallPolicies',variables('hubFwPolicyName'))]"
+  },
+  "resources": [
+    {
+      "name": "[variables('hubFwPublicIpName')]",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "apiVersion": "2019-04-01",
+      "location": "[variables('location')]",
+      "sku": {
+        "name": "Standard"
+      },
+      "properties": {
+        "publicIPAllocationMethod": "Static",
+        "publicIPAddressVersion": "IPv4"
+      }
+    },
+    {
+      "apiVersion": "2020-05-01",
+      "type": "Microsoft.Network/firewallPolicies",
+      "name": "[variables('hubFwPolicyName')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "threatIntelMode": "Alert"
+      }
+    },
+    {
+      "apiVersion": "2021-05-01",
+      "type": "Microsoft.Network/azureFirewalls",
+      "name": "[variables('hubFwName')]",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[variables('azureFirewallPublicIpId')]",
+        "[resourceId('Microsoft.Network/firewallPolicies', variables('hubFwPolicyName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "[concat(variables('hubFwName'), '-ipconfig')]",
+            "properties": {
+              "publicIPAddress": {
+                "id": "[variables('azureFirewallPublicIpId')]"
+              },
+              "subnet": {
+                "id": "[variables('azureFirewallSubnetId')]"
+              }
+            }
+          }
+        ],
+        "firewallPolicy": {
+          "id": "[variables('azureFirewallPolicyId')]"
+        }
+      }
+    }
+  ],
+  "outputs": {}
+}

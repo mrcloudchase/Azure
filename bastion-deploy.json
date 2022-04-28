@@ -1,0 +1,55 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {},
+    "variables": {
+        "location": "[resourceGroup().location]",
+        "rgName": "[resourceGroup().name]",
+        "bastionName": "hub-bastin-01",
+        "bastionPublicIpName": "hub-bastin-01-pip",
+        "existingVNetName": "hub-vnet",
+        "hubBastionSubnetName": "AzureBastionSubnet",
+        "hubBastionSubnetRefID": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('existingVNetName'), variables('hubBastionSubnetName'))]",
+    },
+    "resources": [
+        {
+            "apiVersion": "2019-02-01",
+            "type": "Microsoft.Network/publicIpAddresses",
+            "name": "[variables('bastionPublicIpName')]",
+            "location": "[variables('location')]",
+            "sku": {
+                "name": "Standard"
+            },
+            "properties": {
+                "publicIPAllocationMethod": "Static"
+            },
+            "tags": {}
+        },
+        {
+            "apiVersion": "2018-10-01",
+            "type": "Microsoft.Network/bastionHosts",
+            "name": "[variables('bastionName')]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId(variables('rgName'), 'Microsoft.Network/publicIpAddresses', variables('bastionPublicIpName'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "IpConf",
+                        "properties": {
+                            "subnet": {
+                                "id": "[variables('hubBastionSubnetRefID')]"
+                            },
+                            "publicIPAddress": {
+                                "id": "[resourceId(variables('rgName'), 'Microsoft.Network/publicIpAddresses', variables('bastionPublicIpName'))]"
+                            }
+                        }
+                    }
+                ]
+            },
+            "tags": {}
+        }
+    ],
+    "outputs": {}
+}

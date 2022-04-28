@@ -1,0 +1,172 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {},
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "hubVNetName": "hub-vnet",
+    "hubServicesSubnetName": "SharedServicesSubnet",
+    "hubBastionSubnetName": "AzureBastionSubnet",
+    "hubFwSubnetName": "AzureFirewallSubnet",
+    "hubVNetPrefix": "10.0.0.0/16",
+    "hubServicesSubnetPrefix": "10.0.1.0/24",
+    "hubBastionSubnetPrefix": "10.0.2.0/26",
+    "hubFwSubnetPrefix": "10.0.3.0/26",
+    "spokeVNetName": "spoke-vnet",
+    "spokeServicesSubnetName": "SharedServicesSubnet",
+    "spokeVNetPrefix": "172.16.0.0/16",
+    "spokeServicesSubnetPrefix": "172.16.0.0/24",
+    "hubFwName": "hub-fw",
+    "hubFwPolicyName": "[concat(variables('hubFwName'), '-policy')]",
+    "hubFwPublicIpName": "[concat(variables('hubFwName'), '-pip')]",
+    "azureFirewallSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets',variables('hubVNetName'), variables('hubFwSubnetName'))]",
+    "azureFirewallPublicIpId": "[resourceId('Microsoft.Network/publicIPAddresses',variables('hubFwPublicIpName'))]",
+    "azureFirewallPolicyId": "[resourceId('Microsoft.Network/firewallPolicies',variables('hubFwPolicyName'))]"
+  },
+  "resources": [
+    {
+      "name": "[variables('hubVNetName')]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2018-08-01",
+      "location": "[variables('location')]",
+      "tags": {},
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('hubVNetPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('hubServicesSubnetName')]",
+            "properties": {
+              "addressPrefix": "[variables('hubServicesSubnetPrefix')]"
+            }
+          },
+          {
+            "name": "[variables('hubBastionSubnetName')]",
+            "properties": {
+              "addressPrefix": "[variables('hubBastionSubnetPrefix')]"
+            }
+          },
+          {
+            "name": "[variables('hubFwSubnetName')]",
+            "properties": {
+              "addressPrefix": "[variables('hubFwSubnetPrefix')]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "[variables('spokeVNetName')]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2018-08-01",
+      "location": "[variables('location')]",
+      "tags": {},
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('spokeVNetPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('spokeServicesSubnetName')]",
+            "properties": {
+              "addressPrefix": "[variables('spokeServicesSubnetPrefix')]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "[concat(variables('hubVNetName'), '/peer-to', variables('spokeVNetName'))]",
+      "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+      "apiVersion": "2019-04-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', variables('hubVNetName'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks', variables('spokeVNetName'))]"
+      ],
+      "properties": {
+        "remoteVirtualNetwork": {
+          "id": "[resourceId('Microsoft.Network/virtualNetworks', variables('spokeVNetName'))]"
+        },
+        "allowVirtualNetworkAccess": true,
+        "allowForwardedTraffic": true,
+        "allowGatewayTransit": false,
+        "useRemoteGateways": false
+      }
+    },
+    {
+      "name": "[concat(variables('spokeVNetName'), '/peer-to-', variables('hubVNetName'))]",
+      "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+      "apiVersion": "2019-04-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', variables('hubVNetName'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks', variables('spokeVNetName'))]"
+      ],
+      "properties": {
+        "remoteVirtualNetwork": {
+          "id": "[resourceId('Microsoft.Network/virtualNetworks', variables('hubVNetName'))]"
+        },
+        "allowVirtualNetworkAccess": false,
+        "allowForwardedTraffic": true,
+        "allowGatewayTransit": false,
+        "useRemoteGateways": false
+      }
+    },
+    {
+      "name": "[variables('hubFwPublicIpName')]",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "apiVersion": "2019-04-01",
+      "location": "[variables('location')]",
+      "sku": {
+        "name": "Standard"
+      },
+      "properties": {
+        "publicIPAllocationMethod": "Static",
+        "publicIPAddressVersion": "IPv4"
+      }
+    },
+    {
+      "apiVersion": "2020-05-01",
+      "type": "Microsoft.Network/firewallPolicies",
+      "name": "[variables('hubFwPolicyName')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "threatIntelMode": "Alert"
+      }
+    },
+    {
+      "apiVersion": "2021-05-01",
+      "type": "Microsoft.Network/azureFirewalls",
+      "name": "[variables('hubFwName')]",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', variables('hubVNetName'))]",
+        "[variables('azureFirewallPublicIpId')]",
+        "[resourceId('Microsoft.Network/firewallPolicies', variables('hubFwPolicyName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "[concat(variables('hubFwName'), '-ipconfig')]",
+            "properties": {
+              "publicIPAddress": {
+                "id": "[variables('azureFirewallPublicIpId')]"
+              },
+              "subnet": {
+                "id": "[variables('azureFirewallSubnetId')]"
+              }
+            }
+          }
+        ],
+        "firewallPolicy": {
+          "id": "[variables('azureFirewallPolicyId')]"
+        }
+      }
+    }
+  ],
+  "outputs": {}
+}
