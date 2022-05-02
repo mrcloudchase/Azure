@@ -1,0 +1,84 @@
+    {
+    "PublicConfig": {
+      "WadCfg": {
+        "DiagnosticMonitorConfiguration": {
+          "overallQuotaInMB": 4096,
+          "DiagnosticInfrastructureLogs": {
+            "scheduledTransferLogLevelFilter": "All"
+          },
+          "PerformanceCounters": {
+            "scheduledTransferPeriod": "PT1M",
+            "sinks": "AzureMonitorSink",
+            "PerformanceCounterConfiguration": [
+              {
+                "counterSpecifier": "CPU",
+                "sampleRate": "PT1M"
+              },
+              {
+                "counterSpecifier": "Memory",
+                "sampleRate": "PT1M"
+              },
+              {
+                "counterSpecifier": "Disk",
+                "sampleRate": "PT1M"
+              },
+              {
+                "counterSpecifier": "Network",
+                "sampleRate": "PT1M"
+              },
+              {
+                "counterSpecifier": "ASP.NET",
+                "sampleRate": "PT1M"
+              },
+              {
+                "counterSpecifier": "SQL Server",
+                "sampleRate": "PT1M"
+              }
+            ]
+          },
+          "Directories": {
+            "scheduledTransferPeriod": "PT5M",
+            "IISLogs": {
+              "containerName": "iislogs"
+            },
+            "FailedRequestLogs": {
+              "containerName": "iisfailed"
+            }
+          },
+          "WindowsEventLog": {
+            "scheduledTransferPeriod": "PT5M",
+            "DataSource": [
+              {
+                "name": "System!*[System[Provider[@Name='Microsoft Antimalware']]]"
+              },
+              {
+                "name": "System!*[System[Provider[@Name='NTFS'] and (EventID=55)]]"
+              },
+              {
+                "name": "System!*[System[Provider[@Name='disk'] and (EventID=7 or EventID=52 or EventID=55)]]"
+              }
+            ]
+          },
+          "Logs": {
+            "scheduledTransferPeriod": "PT1M",
+            "scheduledTransferLogLevelFilter": "All"
+          }
+        },
+        "SinksConfig": {
+          "Sink": [
+            {
+              "name": "AzureMonitorSink",
+              "AzureMonitor": {}
+            }
+          ]
+        }
+      },
+      "StorageAccount": "mystorageaccount",
+      "StorageType": "TableAndBlob"
+    },
+    "PrivateConfig": {
+      "storageAccountName": "mystorageaccount",
+      "storageAccountKey": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "storageAccountEndPoint": "https://mystorageaccount.blob.core.windows.net"
+    }
+  }
