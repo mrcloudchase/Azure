@@ -1,5 +1,6 @@
 {
     "PublicConfig": {
+        "StorageAccount": "savistam3rgdiag",
         "WadCfg": {
             "DiagnosticMonitorConfiguration": {
                 "overallQuotaInMB": 5120,
