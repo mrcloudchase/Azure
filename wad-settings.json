@@ -16,7 +16,7 @@
                     ]
                 },
                 "DiagnosticInfrastructureLogs": {
-                    "scheduledTransferLogLevelFilter": "All",
+                    "scheduledTransferLogLevelFilter": "Verbose",
                     "scheduledTransferPeriod": "PT1M"
                 },
                 "PerformanceCounters": {
