@@ -22,7 +22,7 @@
                             "scheduledTransferPeriod": "PT1H"
                         }
                     ],
-                    "resourceId": "/subscriptions/a362b710-5701-4fbc-8d74-c2d4e344427f/resourceGroups/savista-m3-rg/providers/Microsoft.Compute/virtualMachines/savista-m3-linux-vm-01"
+                    "resourceId": "vmID"
                 },
                 "performanceCounters": {
                     "performanceCounterConfiguration": [
@@ -757,10 +757,5 @@
             },
             "sampleRateInSeconds": 15
         }
-    },
-    "PrivateConfig": {
-        "storageAccountName": "mystorageaccount",
-        "storageAccountKey": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-        "storageAccountEndPoint": "https://mystorageaccount.blob.core.windows.net"
     }
 }
